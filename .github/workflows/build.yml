@@ -21,17 +21,23 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.x'
           channel: 'stable'
 
-      - name: Install Dependencies
-        run: flutter pub get
+      - name: Prepare Project
+        run: |
+          # If files were uploaded inside a subfolder, move them to root
+          if [ -d "boon_vpn_project" ]; then
+            cp -r boon_vpn_project/* .
+          fi
+          flutter create . --org com.boonvpn
+          flutter pub get
 
       - name: Build Android APK
-        run: flutter build apk --release
+        run: |
+          flutter build apk --release --target-platform android-arm64
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: boon-vpn-release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: build/app/outputs/flutter-apk/app-*-release.apk
